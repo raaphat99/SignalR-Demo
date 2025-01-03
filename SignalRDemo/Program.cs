@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using SignalRDemo.Data;
+using SignalRDemo.Hubs;
+
 namespace SignalRDemo
 {
     public class Program
@@ -8,6 +12,12 @@ namespace SignalRDemo
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Register Application Context
+            builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Register SignalR
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -28,7 +38,9 @@ namespace SignalRDemo
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Course}/{action=Index}/{id?}");
+
+            app.MapHub<CourseHub>("/course-hub");
 
             app.Run();
         }

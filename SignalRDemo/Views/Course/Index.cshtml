@@ -1,0 +1,52 @@
+﻿@model IEnumerable<SignalRDemo.Models.Course>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table id="coursesTable" class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Hours</th>
+            <th>Department</th>
+            <th>Instructor</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var course in Model)
+        {
+            <tr>
+                <td>@course.Name</td>
+                <td>@course.Description</td>
+                <td>@course.Hours</td>
+                <td>@course.Department</td>
+                <td>@course.Instructor</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/course-hub")
+            .build();
+
+        connection.on("AddNewCourse", function (course) {
+            const table = document.getElementById("coursesTable");
+            const row = table.insertRow();
+            row.innerHTML = `<td>${course.name}</td><td>${course.description}</td><td>${course.hours}</td><td>${course.department}</td><td>${course.instructor}</td>`;
+        });
+
+        connection.start().catch(error => console.error(error.toString()));
+    </script>
+}
