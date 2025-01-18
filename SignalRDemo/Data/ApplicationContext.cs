@@ -5,10 +5,25 @@ namespace SignalRDemo.Data
 {
     public class ApplicationContext : DbContext
     {
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<UserConnection> UserConnections { get; set; }
+
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
 
         }
-        public DbSet<Course> Courses { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Message>()
+                .Property(msg => msg.CreatedAt)
+                .HasDefaultValueSql("GETDATE()");
+
+            base.OnModelCreating(modelBuilder);
+        }
+
     }
 }

@@ -38,9 +38,11 @@ namespace SignalRDemo
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Course}/{action=Index}/{id?}");
+                pattern: "{controller=Room}/{action=Index}/");
 
             app.MapHub<CourseHub>("/course-hub");
+            app.MapHub<ChatHub>("/chat-hub");
+
 
             app.Run();
         }

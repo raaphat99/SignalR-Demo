@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SignalRDemo.Data;
 
@@ -11,9 +12,11 @@ using SignalRDemo.Data;
 namespace SignalRDemo.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250117192454_AddUserConnectionTable")]
+    partial class AddUserConnectionTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,7 +150,7 @@ namespace SignalRDemo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserConnections");
+                    b.ToTable("UserConnection");
                 });
 
             modelBuilder.Entity("RoomUser", b =>

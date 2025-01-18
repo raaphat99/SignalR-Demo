@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SignalRDemo.Data;
 
@@ -11,9 +12,11 @@ using SignalRDemo.Data;
 namespace SignalRDemo.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250117121154_AddMessageTable")]
+    partial class AddMessageTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,9 +85,7 @@ namespace SignalRDemo.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
@@ -98,7 +99,7 @@ namespace SignalRDemo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Message");
                 });
 
             modelBuilder.Entity("SignalRDemo.Models.Room", b =>
@@ -126,6 +127,9 @@ namespace SignalRDemo.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ConnectionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -133,21 +137,6 @@ namespace SignalRDemo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("SignalRDemo.Models.UserConnection", b =>
-                {
-                    b.Property<string>("ConnectionId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ConnectionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserConnections");
                 });
 
             modelBuilder.Entity("RoomUser", b =>
@@ -184,17 +173,6 @@ namespace SignalRDemo.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SignalRDemo.Models.UserConnection", b =>
-                {
-                    b.HasOne("SignalRDemo.Models.User", "User")
-                        .WithMany("UserConnections")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SignalRDemo.Models.Room", b =>
                 {
                     b.Navigation("Messages");
@@ -203,8 +181,6 @@ namespace SignalRDemo.Migrations
             modelBuilder.Entity("SignalRDemo.Models.User", b =>
                 {
                     b.Navigation("Messages");
-
-                    b.Navigation("UserConnections");
                 });
 #pragma warning restore 612, 618
         }

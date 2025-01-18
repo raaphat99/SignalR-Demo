@@ -9,7 +9,7 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table id="coursesTable" class="table">
+<table class="table table-bordered" id="courses-table">
     <thead>
         <tr>
             <th>Name</th>
@@ -42,7 +42,7 @@
             .build();
 
         connection.on("AddNewCourse", function (course) {
-            const table = document.getElementById("coursesTable");
+            const table = document.getElementById("courses-table");
             const row = table.insertRow();
             row.innerHTML = `<td>${course.name}</td><td>${course.description}</td><td>${course.hours}</td><td>${course.department}</td><td>${course.instructor}</td>`;
         });

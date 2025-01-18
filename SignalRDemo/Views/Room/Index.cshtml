@@ -1,0 +1,108 @@
+﻿@using SignalRDemo.Models
+@model IEnumerable<Room>;
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<input type="hidden" id="current-user-id" value="2" />
+
+<h1>Chat Rooms</h1>
+<hr />
+
+@foreach (var room in Model)
+{
+    <div class="room-container" data-room-id="@room.Id">
+        <h2>@room.Name</h2>
+        <div class="messages">
+            <ul>
+                @foreach (var message in room.Messages)
+                {
+                    <span>@message.User.Name</span><br />
+                    <span>@message.CreatedAt</span>
+                    <li>@message.Body</li>
+                }
+            </ul>
+        </div>
+        <button type="button" id="join-btn" class="btn btn-primary" data-room-id="@room.Id">Join</button>
+        <input type="text" id="message-input-@room.Id" class="form-control my-2 message-input" style="width: 50%;" asp-action="SendMessage" placeholder="Write your message here.." />
+        <button type="button" id="send-message-btn" class="btn btn-success" data-room-id="@room.Id">Send</button>
+    </div>
+    <hr />
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chat-hub")
+            .build();
+
+        connection.start()
+            .then(() => console.log("SignalR connection established..."))
+            .catch(err => console.error("SignalR connection failed: ", err));
+
+        // Join Room
+        document.querySelectorAll("#join-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                console.log("Join Button is clicked.");
+                const userId = parseInt(document.getElementById("current-user-id").value, 10);
+                const roomId = parseInt(this.dataset.roomId, 10);
+                connection.invoke("joinRoom", userId, roomId)
+                    .then(() => console.log(`New user (Id: ${userId}) has joined the room. Id: ${roomId}`))
+                    .catch(err => console.error("Something went wrong while joining the room.", err));
+            });
+        });
+
+        // Send message
+        document.querySelectorAll("#send-message-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                const userId = parseInt(document.getElementById("current-user-id").value, 10);
+                const roomId = parseInt(this.dataset.roomId, 10);
+                const message = document.querySelector(`#message-input-${roomId}`).value;
+
+                if (message) {
+                    connection.invoke("sendMessage", message, userId, roomId)
+                        .then(() => document.querySelector(`#message-input-${roomId}`).value = "")
+                        .catch(err => console.error("Something went wrong while sending the message.", err));
+                }
+            });
+        });
+
+        // ReceiveMessage event handler
+        connection.on("ReceiveMessage", function (messageData) {
+            console.log("Message received:", messageData);
+            const roomContainer = document.querySelector(`.room-container[data-room-id="${messageData.roomId}"]`);
+            if (roomContainer) {
+                console.log("Inside of the room container...")
+                const messagesList = roomContainer.querySelector(".messages ul");
+                const newMessage = document.createElement("li");
+                newMessage.innerHTML = `
+                        <span>${messageData.senderName}</span><br />
+                                <span>${messageData.createdAt}</span>
+                        <li>${messageData.messageContent}</li>
+                    `;
+                messagesList.appendChild(newMessage);
+            }
+        });
+
+        // NewMember event handler
+        connection.on("NewMember", function (roomData) {
+            console.log(`${roomData.userName} has joined the room ${roomData.roomName}`);
+
+            // Select the room container for the group being joined
+            const roomContainer = document.querySelector(`.room-container[data-room-id="${roomData.roomId}"]`);
+
+            if (roomContainer) {
+                // Update the UI to show that the user has joined the group
+                const joinButton = roomContainer.querySelector("#join-btn");
+                if (joinButton) {
+                    joinButton.disabled = true; // Disable the join button
+                    joinButton.textContent = "Joined"; // Update the button text
+                }
+            }
+        });
+    </script>
+
+}
